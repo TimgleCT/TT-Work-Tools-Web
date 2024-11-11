@@ -4,7 +4,7 @@ import { ResultEnum, RequestEnum, ContentTypeEnum } from '@/enums/httpEnum'
 import { PageEnum } from '@/enums/pageEnum'
 import { routerTurnByName } from '@/utils'
 
-const baseURL = 'http://localhost:3000/'
+const baseURL = import.meta.env.DEV ? import.meta.env.VITE_DEV_API_URL : import.meta.env.VITE_PROD_API_URL
 
 const axiosInstance = axios.create({
     baseURL: baseURL,
