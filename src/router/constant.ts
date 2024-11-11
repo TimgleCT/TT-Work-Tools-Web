@@ -1,0 +1,1 @@
+export const ErrorPage404 = () => import('@/views/Exception/404.vue');
