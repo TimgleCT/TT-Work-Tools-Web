@@ -16,12 +16,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { login } from '@/service/SystemService'
-import { useSystemStore } from '@/stores/system'
 import { routerTurnByName } from '@/utils'
 import { PageEnum } from '@/enums/pageEnum'
 import { AnimalDog20Regular } from '@vicons/fluent'
-
-const systemStore = useSystemStore()
 
 const username = ref<string>('')
 const password = ref<string>('')
@@ -31,9 +28,6 @@ const handleLogin = async () => {
   loading.value = true
   const loginResult = await login(username.value, password.value)
   if (loginResult) {
-    systemStore.setLoginStatus(true)
-    systemStore.setLoginUser(username.value)
-    systemStore.setLoginDateTime(new Date())
     routerTurnByName(PageEnum.GROUP_NAME)
   }
   loading.value = false

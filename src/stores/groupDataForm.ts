@@ -3,7 +3,7 @@ import { IGroupInStorage } from '@/service/GroupsService/index.d'
 import { IProductInStorage } from '@/service/ProductsService/index.d'
 import { defineStore } from 'pinia'
 
-interface GroupDataFormState {
+interface GroupDataForm {
     queryType: QueryGroupTypeEnum
     queryStartDate: number
     queryEndDate: number
@@ -13,7 +13,7 @@ interface GroupDataFormState {
 }
 
 export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
-  state: (): GroupDataFormState => ({
+  state: (): GroupDataForm => ({
     queryType: QueryGroupTypeEnum.BY_CREATE_DATE,
     // 預設為上個月 0:0:0
     queryStartDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).setHours(0, 0, 0, 0),

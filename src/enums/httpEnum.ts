@@ -3,6 +3,7 @@ export enum ResultEnum {
     SUCCESS = 200,
     SERVER_ERROR = 500,
     CSRF_ERROR = 419,
+    UNAUTHORIZED = 401,
     SERVER_FORBIDDEN = 403,
     NOT_FOUND = 404,
     TOKEN_OVERDUE = 886,

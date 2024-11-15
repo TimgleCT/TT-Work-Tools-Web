@@ -50,7 +50,7 @@
 <script setup lang="ts">
 
 import { ref, computed } from 'vue'
-import { useGroupDataFormStore } from '@/stores/groupDataFormState'
+import { useGroupDataFormStore } from '@/stores/groupDataForm'
 import { getAllProducts } from '@/service/ProductsService'
 import { getAllGroups, getGroupsByQuery } from '@/service/GroupsService'
 import {  timestampToDateString } from '@/utils'

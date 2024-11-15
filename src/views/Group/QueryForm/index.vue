@@ -20,7 +20,7 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { useGroupDataFormStore } from '@/stores/groupDataFormState'
+import { useGroupDataFormStore } from '@/stores/groupDataForm'
 import { getAllProducts } from '@/service/ProductsService'
 import { getGroupsByQuery } from '@/service/GroupsService'
 import { QueryGroupTypeEnum } from '@/enums/groupEnum'

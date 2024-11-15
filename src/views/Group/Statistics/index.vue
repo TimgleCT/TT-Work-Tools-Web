@@ -27,7 +27,7 @@
 
 import { computed, ref } from 'vue'
 import type { DataTableColumns, DataTableInst } from 'naive-ui'
-import { useGroupDataFormStore } from '@/stores/groupDataFormState'
+import { useGroupDataFormStore } from '@/stores/groupDataForm'
 import { statisticsGroup } from '@/service/GroupsService'
 import { IGroupStatistics } from './index.d'
 import { DownloadCsvButton } from '@/components/DownloadCsvButton'

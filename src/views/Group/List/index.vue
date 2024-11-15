@@ -30,7 +30,7 @@ import { IGroup } from './index.d'
 import type { DataTableColumns, DataTableInst } from 'naive-ui'
 import {  timestampToDateString, getUniqueObjArrayByProperty, addNumberComma } from '@/utils'
 import { QueryGroupTypeEnum } from '@/enums/groupEnum'
-import { useGroupDataFormStore } from '@/stores/groupDataFormState'
+import { useGroupDataFormStore } from '@/stores/groupDataForm'
 import { DownloadCsvButton } from '@/components/DownloadCsvButton'
 
 const groupDataTableRef = ref<DataTableInst>()
