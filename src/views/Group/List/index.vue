@@ -18,16 +18,15 @@
         :loading="loading"
         :max-height="500"
         :min-height="500"
-        striped
       />
     </div>
   </n-space>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { IGroup } from './index.d'
-import type { DataTableColumns, DataTableInst } from 'naive-ui'
+import type { DataTableColumns, DataTableInst, DataTableBaseColumn } from 'naive-ui'
 import {  timestampToDateString, getUniqueObjArrayByProperty, addNumberComma } from '@/utils'
 import { QueryGroupTypeEnum } from '@/enums/groupEnum'
 import { useGroupDataFormStore } from '@/stores/groupDataForm'
@@ -40,8 +39,22 @@ const groupDataFormStore = useGroupDataFormStore()
 const groups = computed(() => groupDataFormStore.getGroupList)
 const loading = computed(() => groupDataFormStore.getIsLoading)
 
-const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
-  const columns: DataTableColumns<IGroup> = [
+const productColumn = reactive<DataTableBaseColumn<IGroup>>({
+    title: '開團產品',
+    key: 'prod',
+    filterOptions: getUniqueObjArrayByProperty(groups.value.groupList
+      .filter(group => group.prod)
+      .map(group => ({
+        label: group.prod || '',
+        value: group.prod || ''
+      })), 'value') || [],
+    filter(value, row) {
+      return row.prod === value
+    },
+    filterOptionValue: null
+})
+
+const rawDataColumns = reactive<DataTableColumns<IGroup>>([
     {
       title: 'No',
       key: 'No',
@@ -72,19 +85,7 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
       title: '開團結束日',
       key: 'endDate',
     },
-    {
-      title: '開團產品',
-      key: 'prod',
-      filterOptions: getUniqueObjArrayByProperty(groups.value.groupList
-      .filter(group => group.prod)
-      .map(group => ({
-        label: group.prod || '',
-        value: group.prod || ''
-      })), 'value') || [],
-      filter(value, row) {
-        return row.prod === value
-      }
-    },
+    productColumn,
     {
       title: 'KOL',
       key: 'kol_name',
@@ -131,16 +132,18 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
         return addNumberComma(row.revenue || 0)
       },
     }
-  ]
+])
 
-  if (groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE) {
-    const createDateColumn = columns.splice(1, 1)[0];
-    columns.splice(3, 0, createDateColumn);
-  }
+watch(() => groupDataFormStore.getFilterProduct, () => {
+  productColumn.filterOptionValue = groupDataFormStore.getFilterProduct
+})
 
-  return columns;
-
-}) 
+watch(() => groupDataFormStore.getQueryType, () => {
+  const cutTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 1 : 3
+  const setTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 3 : 1
+  const createDateColumn = rawDataColumns.splice(cutTargetIndex, 1)[0];
+  rawDataColumns.splice(setTargetIndex, 0, createDateColumn);
+})
 
 const exportSorterAndFilterCsv = () => {
   groupDataTableRef.value?.downloadCsv({

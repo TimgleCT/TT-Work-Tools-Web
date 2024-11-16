@@ -17,7 +17,7 @@
                 :scroll-x="statisticalColumnsXWidth"
                 :max-height="500"
                 :min-height="500"
-                striped
+                :row-props="goGroupListAndSetProductFilter"
             />
         </div>
     </n-space>
@@ -61,8 +61,15 @@ const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
         width: 160,
       },
       {
-        title: '本月已排定開團數量',
-        key: 'create_group_by_the_month',
+        title: '本月已排定開團數',
+        key: 'create_group_count_by_the_month',
+        width: 170,
+        align: 'center',
+        sorter: 'default'
+      },
+      {
+        title: '開團數',
+        key: 'create_group_count_by_total',
         width: 170,
         align: 'center',
         sorter: 'default'
@@ -95,7 +102,7 @@ const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
   const yearMonthKeys = sortDateStringList(statisticsKeys.filter(key => isYearMonthString(key)), 'desc')
   yearMonthKeys.forEach(key => {
     resultColumns.push({
-      title: `${key} 開團數量`,
+      title: `${key} 開團數`,
       key: key,
       align: 'center',
       sorter: 'default'
@@ -106,13 +113,13 @@ const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
 })
 
 const statisticalColumnsXWidth = computed(() => {
-  const baseWidth = 800
+  const baseWidth = 900
   if (statistics.value.length === 0) {
     return baseWidth
   }
   const statisticsKeys = Object.keys(statistics.value[0])
   const yearMonthKeys = statisticsKeys.filter(key => isYearMonthString(key))
-  return baseWidth + yearMonthKeys.length * 170
+  return baseWidth + yearMonthKeys.length * 160
 })
 
 const exportSorterAndFilterCsv = () => {
@@ -120,6 +127,20 @@ const exportSorterAndFilterCsv = () => {
     fileName: `${timestampToDateString(groupDataFormStore.getQueryStartDate, 'YYYY-MM-DD')}_${timestampToDateString(groupDataFormStore.getQueryEndDate, 'YYYY-MM-DD')}_group_statistical.csv`,
     keepOriginalData: false,
   })
+}
+
+
+const emits = defineEmits(['goGroupListAndSetProductFilter'])
+const goGroupListAndSetProductFilter = (row: IGroupStatistics) => {
+  return {
+    style: {
+      cursor: 'pointer'
+    },
+    onClick: () => {
+      groupDataFormStore.setFilterProduct(row.product_name)
+      emits('goGroupListAndSetProductFilter')
+    }
+  }
 }
 
 </script>

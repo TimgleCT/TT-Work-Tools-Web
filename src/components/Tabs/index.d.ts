@@ -4,4 +4,7 @@ export interface ITab {
     component: Component
     name: string
     title: string
+    emitHandlers: {
+        [key: string]: Function
+    }
 }

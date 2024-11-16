@@ -10,6 +10,7 @@ interface GroupDataForm {
     productList: IProductInStorage
     groupList: IGroupInStorage
     isLoading: boolean
+    filterProduct: string | null
 }
 
 export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
@@ -21,7 +22,8 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     queryEndDate: new Date().setHours(0, 0, 0, 0),
     productList: { productList: [], updateAt: 0 },
     groupList: { groupList: [], updateAt: 0 },
-    isLoading: false
+    isLoading: false,
+    filterProduct: null,
   }),
   getters: {
     getQueryType(): QueryGroupTypeEnum {
@@ -41,6 +43,9 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     },
     getIsLoading(): boolean {
       return this.isLoading
+    },
+    getFilterProduct(): string | null {
+      return this.filterProduct
     }
   },
   actions: {
@@ -61,6 +66,9 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     },
     setIsLoading(isLoading: boolean) {
       this.isLoading = isLoading
+    },
+    setFilterProduct(filterProduct: string) {
+      this.filterProduct = filterProduct
     }
   },
 })

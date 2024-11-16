@@ -1,8 +1,9 @@
 <template>
   <n-tabs type="segment" animated>
-    <n-tab-pane v-for="component in components" :name="component.name" :tab="component.title">
+    <n-tab-pane v-for="component in components" :key="component.name" :name="component.name" :tab="component.title" display-directive="show">
       <component
         :is="component.component"
+        v-on="component.emitHandlers"
       ></component>
     </n-tab-pane>
   </n-tabs>
@@ -12,7 +13,7 @@
 import { ITab } from './index.d'
 
 const props = defineProps({
-  components: Array<ITab>
+    components: Array<ITab>,
 })
 
 </script>

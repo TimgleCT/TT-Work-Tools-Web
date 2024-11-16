@@ -127,7 +127,8 @@ export const statisticsGroup = (groupData: IGroup[], productData: IProduct[]): I
                     product_name: productInfo.prod,
                     vendor_id: productInfo.vendor?.vid || null,
                     vendor_name: productInfo.vendor?.vendorName || null,
-                    create_group_by_the_month: 0,
+                    create_group_count_by_the_month: 0,
+                    create_group_count_by_total: 0,
                     revenue_sum: 0,
                     order_count: 0,
                     ...yearMonthsObject
@@ -136,8 +137,11 @@ export const statisticsGroup = (groupData: IGroup[], productData: IProduct[]): I
 
             const product = productDict[productInfo.dpid]
             if (product) {
+                
+                product.create_group_count_by_total += 1
+
                 if (group.created_at && isCurrentMonth(group.created_at)) {
-                    product.create_group_by_the_month += 1
+                    product.create_group_count_by_the_month += 1
                 }
 
                 if (group.startDate) {
