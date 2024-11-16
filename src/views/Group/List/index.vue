@@ -43,13 +43,21 @@ const loading = computed(() => groupDataFormStore.getIsLoading)
 const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
   const columns: DataTableColumns<IGroup> = [
     {
+      title: 'No',
+      key: 'No',
+      render(row: IGroup, index: number) {
+        return index + 1
+      },
+      width: 60
+    },
+    {
       title: '建立日期',
       key: 'createDate',
       sorter: (a, b) => {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : Infinity;
         const dateB = b.created_at ? new Date(b.created_at).getTime() : Infinity;
         return dateA - dateB;
-      }
+      },
     },
     {
       title: '開團起始日',
@@ -126,8 +134,8 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
   ]
 
   if (groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE) {
-    const createDateColumn = columns.splice(0, 1)[0];
-    columns.splice(2, 0, createDateColumn);
+    const createDateColumn = columns.splice(1, 1)[0];
+    columns.splice(3, 0, createDateColumn);
   }
 
   return columns;
