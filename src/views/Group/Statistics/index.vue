@@ -45,7 +45,8 @@ const statistics = computed(() => {
 })
 
 const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
-  const resultColumns: DataTableColumns<IGroupStatistics> = [
+  const resultColumns: DataTableColumns<IGroupStatistics> = 
+  [
       {
         title: '產品名稱',
         key: 'product_name',

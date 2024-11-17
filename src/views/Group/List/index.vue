@@ -18,6 +18,7 @@
         :loading="loading"
         :max-height="500"
         :min-height="500"
+        @update:filters="handleUpdateFilter"
       />
     </div>
   </n-space>
@@ -26,7 +27,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { IGroup } from './index.d'
-import type { DataTableColumns, DataTableInst, DataTableBaseColumn } from 'naive-ui'
+import type { DataTableColumns, DataTableInst, DataTableBaseColumn, DataTableFilterState } from 'naive-ui'
 import {  timestampToDateString, getUniqueObjArrayByProperty, addNumberComma } from '@/utils'
 import { QueryGroupTypeEnum } from '@/enums/groupEnum'
 import { useGroupDataFormStore } from '@/stores/groupDataForm'
@@ -39,22 +40,10 @@ const groupDataFormStore = useGroupDataFormStore()
 const groups = computed(() => groupDataFormStore.getGroupList)
 const loading = computed(() => groupDataFormStore.getIsLoading)
 
-const productColumn = reactive<DataTableBaseColumn<IGroup>>({
-    title: '開團產品',
-    key: 'prod',
-    filterOptions: getUniqueObjArrayByProperty(groups.value.groupList
-      .filter(group => group.prod)
-      .map(group => ({
-        label: group.prod || '',
-        value: group.prod || ''
-      })), 'value') || [],
-    filter(value, row) {
-      return row.prod === value
-    },
-    filterOptionValue: null
-})
-
-const rawDataColumns = reactive<DataTableColumns<IGroup>>([
+const productColumnFilterValue = ref<null | string>(null)
+const productColumnKey = 'prod'
+const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
+  return [
     {
       title: 'No',
       key: 'No',
@@ -85,7 +74,20 @@ const rawDataColumns = reactive<DataTableColumns<IGroup>>([
       title: '開團結束日',
       key: 'endDate',
     },
-    productColumn,
+    {
+      title: '開團產品',
+      key: productColumnKey,
+      filterOptions: getUniqueObjArrayByProperty(groups.value.groupList
+        .filter(group => group.prod)
+        .map(group => ({
+          label: group.prod || '',
+          value: group.prod || ''
+        })), 'value') || [],
+      filter(value, row) {
+        return row.prod === value
+      },
+      filterOptionValue: productColumnFilterValue.value
+    },
     {
       title: 'KOL',
       key: 'kol_name',
@@ -132,17 +134,24 @@ const rawDataColumns = reactive<DataTableColumns<IGroup>>([
         return addNumberComma(row.revenue || 0)
       },
     }
-])
+  ]
+})
+
+const handleUpdateFilter = (filters: DataTableFilterState, sourceColumn: DataTableBaseColumn) => { 
+  if (sourceColumn.key === productColumnKey) {
+    productColumnFilterValue.value = filters[sourceColumn.key] as string
+  }
+}
 
 watch(() => groupDataFormStore.getFilterProduct, () => {
-  productColumn.filterOptionValue = groupDataFormStore.getFilterProduct
+  productColumnFilterValue.value = groupDataFormStore.getFilterProduct
 })
 
 watch(() => groupDataFormStore.getQueryType, () => {
   const cutTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 1 : 3
   const setTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 3 : 1
-  const createDateColumn = rawDataColumns.splice(cutTargetIndex, 1)[0];
-  rawDataColumns.splice(setTargetIndex, 0, createDateColumn);
+  const createDateColumn = rawDataColumns.value.splice(cutTargetIndex, 1)[0];
+  rawDataColumns.value.splice(setTargetIndex, 0, createDateColumn);
 })
 
 const exportSorterAndFilterCsv = () => {
