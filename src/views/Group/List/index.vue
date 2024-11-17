@@ -43,7 +43,7 @@ const loading = computed(() => groupDataFormStore.getIsLoading)
 const productColumnFilterValue = ref<null | string>(null)
 const productColumnKey = 'prod'
 const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
-  return [
+  const columns: DataTableColumns<IGroup> = [
     {
       title: 'No',
       key: 'No',
@@ -135,6 +135,13 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
       },
     }
   ]
+
+  const cutTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 1 : 3
+  const setTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 3 : 1
+  const createDateColumn = columns.splice(cutTargetIndex, 1)[0];
+  columns.splice(setTargetIndex, 0, createDateColumn);
+
+  return columns
 })
 
 const handleUpdateFilter = (filters: DataTableFilterState, sourceColumn: DataTableBaseColumn) => { 
@@ -145,13 +152,6 @@ const handleUpdateFilter = (filters: DataTableFilterState, sourceColumn: DataTab
 
 watch(() => groupDataFormStore.getFilterProduct, () => {
   productColumnFilterValue.value = groupDataFormStore.getFilterProduct
-})
-
-watch(() => groupDataFormStore.getQueryType, () => {
-  const cutTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 1 : 3
-  const setTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 3 : 1
-  const createDateColumn = rawDataColumns.value.splice(cutTargetIndex, 1)[0];
-  rawDataColumns.value.splice(setTargetIndex, 0, createDateColumn);
 })
 
 const exportSorterAndFilterCsv = () => {
