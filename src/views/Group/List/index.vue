@@ -136,10 +136,10 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
     }
   ]
 
-  const cutTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 1 : 3
-  const setTargetIndex = groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE ? 3 : 1
-  const createDateColumn = columns.splice(cutTargetIndex, 1)[0];
-  columns.splice(setTargetIndex, 0, createDateColumn);
+  if (groupDataFormStore.getQueryType === QueryGroupTypeEnum.BY_START_DATE) {
+    const createDateColumn = columns.splice(1, 1)[0];
+    columns.splice(3, 0, createDateColumn);
+  } 
 
   return columns
 })
