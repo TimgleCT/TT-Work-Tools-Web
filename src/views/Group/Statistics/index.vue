@@ -2,7 +2,14 @@
     <n-space vertical>
         <div class="header">
             <n-space justify="space-between">
-                <div>團購統計</div>
+                <n-space align="center">
+                    <div>團購統計</div>
+                    <n-icon 
+                      @click="openSettingsModal" 
+                      class="align-center cursor-pointer">
+                      <settings-outline></settings-outline>
+                    </n-icon>
+                </n-space>
                 <download-csv-button :download-function="exportSorterAndFilterCsv" />
             </n-space>
         </div>
@@ -21,17 +28,25 @@
             />
         </div>
     </n-space>
+
+    <setting-modal
+        :show-modal="showSettingsModal"
+        @close-modal="closeSettingsModal"
+    ></setting-modal>
 </template>
   
 <script setup lang="ts">
 
 import { computed, ref } from 'vue'
-import type { DataTableColumns, DataTableInst } from 'naive-ui'
+import type { DataTableColumns, DataTableInst, DataTableColumn } from 'naive-ui'
 import { useGroupDataFormStore } from '@/stores/groupDataForm'
 import { statisticsGroup } from '@/service/GroupsService'
 import { IGroupStatistics } from './index.d'
 import { DownloadCsvButton } from '@/components/DownloadCsvButton'
 import { isYearMonthString, sortDateStringList, addNumberComma, timestampToDateString } from '@/utils'
+import { SettingsOutline } from '@vicons/ionicons5'
+import { SettingModal } from './components/SettingModal'
+import { GroupStatisticsColumnsEnum } from '@/enums/groupEnum'
 
 const statisticalDataTableRef = ref<DataTableInst>()
 const groupDataFormStore = useGroupDataFormStore()
@@ -44,78 +59,105 @@ const statistics = computed(() => {
   return statisticsGroup(groups.value.groupList, products.value.productList)
 })
 
-const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
-  const resultColumns: DataTableColumns<IGroupStatistics> = 
-  [
-      {
-        title: '產品名稱',
-        key: 'product_name',
-        align: 'center',
-        fixed: 'left',
-        width: 160,
+const staticStartColumns: { [key: string]: DataTableColumn<IGroupStatistics> } = {
+  [GroupStatisticsColumnsEnum.PRODUCT_NAME]: {
+      title: '產品名稱',
+      key: GroupStatisticsColumnsEnum.PRODUCT_NAME,
+      titleAlign: 'center',
+      align: 'center',
+      fixed: 'left',
+      width: 160,
+  },
+  [GroupStatisticsColumnsEnum.VENDOR_NAME]: {
+      title: '品牌名稱',
+      key: GroupStatisticsColumnsEnum.VENDOR_NAME,
+      titleAlign: 'center',
+      align: 'center',
+      fixed: 'left',
+      width: 160,
+  },
+  [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_THE_MONTH]: {
+      title: '本月已排定開團數',
+      key: GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_THE_MONTH,
+      titleAlign: 'center',
+      width: 170,
+      align: 'right',
+      sorter: 'default'
+  },
+  [GroupStatisticsColumnsEnum.REVENUE_SUM]: {
+      title: '營收',
+      key: GroupStatisticsColumnsEnum.REVENUE_SUM,
+      titleAlign: 'center',
+      align: 'right',
+      sorter: 'default',
+      width: 120,
+      render(row: IGroupStatistics) {
+        return addNumberComma(row.revenue_sum || 0)
       },
-      {
-        title: '品牌名稱',
-        key: 'vendor_name',
-        align: 'center',
-        fixed: 'left',
-        width: 160,
+  },
+  [GroupStatisticsColumnsEnum.ORDER_COUNT]: {
+      title: '訂單數',
+      key: GroupStatisticsColumnsEnum.ORDER_COUNT,
+      titleAlign: 'center',
+      align: 'right',
+      sorter: 'default',
+      width: 120,
+      render(row: IGroupStatistics) {
+        return addNumberComma(row.order_count || 0)
       },
-      {
-        title: '本月已排定開團數',
-        key: 'create_group_count_by_the_month',
-        width: 170,
-        align: 'center',
-        sorter: 'default'
-      },
-      {
-        title: '開團數',
-        key: 'create_group_count_by_total',
-        width: 170,
-        align: 'center',
-        sorter: 'default'
-      },
-      {
-        title: '營收',
-        key: 'revenue_sum',
-        align: 'center',
-        sorter: 'default',
-        render(row: IGroupStatistics) {
-          return addNumberComma(row.revenue_sum || 0)
-        },
-      },
-      {
-        title: '訂單數',
-        key: 'order_count',
-        align: 'center',
-        sorter: 'default',
-        render(row: IGroupStatistics) {
-          return addNumberComma(row.order_count || 0)
-        },
-      }
-  ]
+  }
+}
 
-  if (statistics.value.length === 0) {
-    return resultColumns
+const staticEndColumns: { [key: string]: DataTableColumn<IGroupStatistics> } = {
+  [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_TOTAL]: {
+      title: '期間內總開團數',
+      key: GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_TOTAL,
+      className: 'total-group',
+      width: 160,
+      titleAlign: 'center',
+      align: 'right',
+      sorter: 'default'
+  }
+}
+
+const statisticalColumns = computed<DataTableColumns<IGroupStatistics>>(() => {
+  const resultColumns: DataTableColumns<IGroupStatistics> = []
+  const showColumnsSettings = groupDataFormStore.getStatisticShowColumns
+  const staticStartColumnsKeys = Object.keys(staticStartColumns) as GroupStatisticsColumnsEnum[]
+  const staticEndColumnsKeys = Object.keys(staticEndColumns) as GroupStatisticsColumnsEnum[]
+
+  staticStartColumnsKeys.forEach(key => {
+    if (showColumnsSettings[key]) {
+      resultColumns.push(staticStartColumns[key])
+    }
+  })
+
+  if (statistics.value.length !== 0 && showColumnsSettings[GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_MONTH]) {
+    const statisticsKeys = Object.keys(statistics.value[0])
+    const yearMonthKeys = sortDateStringList(statisticsKeys.filter(key => isYearMonthString(key)), 'desc')
+    yearMonthKeys.forEach(key => {
+      resultColumns.push({
+        title: `${key} 開團數`,
+        key: key,
+        titleAlign: 'center',
+        align: 'right',
+        sorter: 'default'
+      })
+    })
   }
 
-  const statisticsKeys = Object.keys(statistics.value[0])
-  const yearMonthKeys = sortDateStringList(statisticsKeys.filter(key => isYearMonthString(key)), 'desc')
-  yearMonthKeys.forEach(key => {
-    resultColumns.push({
-      title: `${key} 開團數`,
-      key: key,
-      align: 'center',
-      sorter: 'default'
-    })
+  staticEndColumnsKeys.forEach(key => {
+    if (showColumnsSettings[key]) {
+      resultColumns.push(staticEndColumns[key])
+    }
   })
 
   return resultColumns
 })
 
 const statisticalColumnsXWidth = computed(() => {
-  const baseWidth = 900
-  if (statistics.value.length === 0) {
+  const baseWidth = statisticalColumns.value.reduce((total, column) => total + ((typeof column.width === 'number' ? column.width : 0)), 0)
+  if (statistics.value.length === 0 || !groupDataFormStore.getStatisticShowColumns[GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_MONTH]) {
     return baseWidth
   }
   const statisticsKeys = Object.keys(statistics.value[0])
@@ -144,6 +186,14 @@ const goGroupListAndSetProductFilter = (row: IGroupStatistics) => {
   }
 }
 
+const showSettingsModal = ref(false)
+const openSettingsModal = () => {
+  showSettingsModal.value = true
+}
+const closeSettingsModal = () => {
+  showSettingsModal.value = false
+}
+
 </script>
 
 <style scoped>
@@ -155,5 +205,10 @@ const goGroupListAndSetProductFilter = (row: IGroupStatistics) => {
 .content {
   margin-bottom: 1.0rem;
 }
+
+:deep(.total-group) {
+  background: #26262a !important;
+}
+
 </style>
   

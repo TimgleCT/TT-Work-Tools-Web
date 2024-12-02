@@ -1,7 +1,9 @@
-import { QueryGroupTypeEnum } from '@/enums/groupEnum'
+import { QueryGroupTypeEnum, GroupStatisticsSettingsEnum, GroupStatisticsColumnsEnum } from '@/enums/groupEnum'
 import { IGroupInStorage } from '@/service/GroupsService/index.d'
 import { IProductInStorage } from '@/service/ProductsService/index.d'
+import { IGroupStatisticsShowColumnsSettings } from '@/views/Group/Statistics/index.d'
 import { defineStore } from 'pinia'
+import { getLocal, setLocal } from '@/service/LocalStorageService'
 
 interface GroupDataForm {
     queryType: QueryGroupTypeEnum
@@ -11,6 +13,9 @@ interface GroupDataForm {
     groupList: IGroupInStorage
     isLoading: boolean
     filterProduct: string | null
+    statisticsSettings: {
+      [GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS]: IGroupStatisticsShowColumnsSettings
+    }
 }
 
 export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
@@ -24,6 +29,17 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     groupList: { groupList: [], updateAt: 0 },
     isLoading: false,
     filterProduct: null,
+    statisticsSettings: {
+      [GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS]: getLocal(GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS).data ?? {
+        [GroupStatisticsColumnsEnum.PRODUCT_NAME]: true,
+        [GroupStatisticsColumnsEnum.VENDOR_NAME]: true,
+        [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_THE_MONTH]: true,
+        [GroupStatisticsColumnsEnum.REVENUE_SUM]: true,
+        [GroupStatisticsColumnsEnum.ORDER_COUNT]: true,
+        [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_MONTH]: true,
+        [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_TOTAL]: true,
+      }
+    },
   }),
   getters: {
     getQueryType(): QueryGroupTypeEnum {
@@ -46,6 +62,9 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     },
     getFilterProduct(): string | null {
       return this.filterProduct
+    },
+    getStatisticShowColumns(): IGroupStatisticsShowColumnsSettings {
+      return this.statisticsSettings.statisticShowColumns
     }
   },
   actions: {
@@ -69,6 +88,10 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     },
     setFilterProduct(filterProduct: string) {
       this.filterProduct = filterProduct
+    },
+    setStatisticShowColumns(statisticShowColumns: IGroupStatisticsShowColumnsSettings) {
+      this.statisticsSettings.statisticShowColumns = statisticShowColumns
+      setLocal(GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS, statisticShowColumns)
     }
   },
 })
