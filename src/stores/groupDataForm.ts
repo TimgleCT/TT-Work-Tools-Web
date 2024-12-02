@@ -30,7 +30,7 @@ export const useGroupDataFormStore = defineStore('useGroupDataFormStore', {
     isLoading: false,
     filterProduct: null,
     statisticsSettings: {
-      [GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS]: getLocal(GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS).data ?? {
+      [GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS]: getLocal(GroupStatisticsSettingsEnum.STATISTIC_SHOW_COLUMNS)?.data ?? {
         [GroupStatisticsColumnsEnum.PRODUCT_NAME]: true,
         [GroupStatisticsColumnsEnum.VENDOR_NAME]: true,
         [GroupStatisticsColumnsEnum.CREATE_GROUP_COUNT_BY_THE_MONTH]: true,
