@@ -54,12 +54,15 @@ const rawDataColumns = computed<DataTableColumns<IGroup>>(() => {
     },
     {
       title: '建立日期',
-      key: 'createDate',
+      key: 'created_at',
       sorter: (a, b) => {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : Infinity;
         const dateB = b.created_at ? new Date(b.created_at).getTime() : Infinity;
         return dateA - dateB;
       },
+      render(row: IGroup) {
+        return (row.created_at) ? timestampToDateString(new Date(row.created_at).getTime(), 'YYYY-MM-DD') : ''
+      }
     },
     {
       title: '開團起始日',
