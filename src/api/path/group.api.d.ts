@@ -8,6 +8,7 @@ export interface IQueryGroupListApi {
     sort_by: string
     dpid: number
     kid: number
+    type: string
 }
 
 export interface IQueryGroupListApiResult {
