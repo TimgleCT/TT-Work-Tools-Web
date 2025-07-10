@@ -39,6 +39,7 @@ export const getAllGroupsFromRemote = async(syncProgressCallBack?: (currentStep:
         sort_by: 'desc',
         dpid: 0,
         kid: 0,
+        type: 'group',
     }
 
     const result: IQueryGroupListApiResult | null = await getGroupListApi(params)
